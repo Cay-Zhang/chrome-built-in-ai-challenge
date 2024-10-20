@@ -1,0 +1,94 @@
+// Shared self.ai APIs
+
+partial interface WindowOrWorkerGlobalScope {
+  [Replaceable, SecureContext] readonly attribute AI ai;
+};
+
+[Exposed=(Window,Worker), SecureContext]
+interface AI {
+  readonly attribute AILanguageModelFactory languageModel;
+};
+
+[Exposed=(Window,Worker), SecureContext]
+interface AICreateMonitor : EventTarget {
+  attribute EventHandler ondownloadprogress;
+
+  // Might get more stuff in the future, e.g. for
+  // https://github.com/explainers-by-googlers/prompt-api/issues/4
+};
+
+callback AICreateMonitorCallback = undefined (AICreateMonitor monitor);
+
+enum AICapabilityAvailability { "readily", "after-download", "no" };
+
+// Language Model
+
+[Exposed=(Window,Worker), SecureContext]
+interface AILanguageModelFactory {
+  Promise<AILanguageModel> create(optional AILanguageModelCreateOptions options = {});
+  Promise<AILanguageModelCapabilities> capabilities();
+};
+
+[Exposed=(Window,Worker), SecureContext]
+interface AILanguageModel : EventTarget {
+  Promise<DOMString> prompt(AILanguageModelPromptInput input, optional AILanguageModelPromptOptions options = {});
+  ReadableStream promptStreaming(AILanguageModelPromptInput input, optional AILanguageModelPromptOptions options = {});
+
+  Promise<unsigned long long> countPromptTokens(AILanguageModelPromptInput input, optional AILanguageModelPromptOptions options = {});
+  readonly attribute unsigned long long maxTokens;
+  readonly attribute unsigned long long tokensSoFar;
+  readonly attribute unsigned long long tokensLeft;
+
+  readonly attribute unsigned long topK;
+  readonly attribute float temperature;
+
+  attribute EventHandler oncontextoverflow;
+
+  Promise<AILanguageModel> clone(optional AILanguageModelCloneOptions options = {});
+  undefined destroy();
+};
+
+[Exposed=(Window,Worker), SecureContext]
+interface AILanguageModelCapabilities {
+  readonly attribute AICapabilityAvailability available;
+  AICapabilityAvailability languageAvailable(DOMString languageTag);
+
+  // Always null if available === "no"
+  readonly attribute unsigned long? defaultTopK;
+  readonly attribute unsigned long? maxTopK;
+  readonly attribute float? defaultTemperature;
+  readonly attribute float? maxTemperature;
+};
+
+dictionary AILanguageModelCreateOptions {
+  AbortSignal signal;
+  AICreateMonitorCallback monitor;
+
+  DOMString systemPrompt;
+  sequence<AILanguageModelInitialPrompt> initialPrompts;
+  [EnforceRange] unsigned long topK;
+  float temperature;
+};
+
+dictionary AILanguageModelInitialPrompt {
+  required AILanguageModelInitialPromptRole role;
+  required DOMString content;
+};
+
+dictionary AILanguageModelPrompt {
+  required AILanguageModelPromptRole role;
+  required DOMString content;
+};
+
+dictionary AILanguageModelPromptOptions {
+  AbortSignal signal;
+};
+
+dictionary AILanguageModelCloneOptions {
+  AbortSignal signal;
+};
+
+typedef (DOMString or AILanguageModelPrompt or sequence<AILanguageModelPrompt>) AILanguageModelPromptInput;
+
+enum AILanguageModelInitialPromptRole { "system", "user", "assistant" };
+enum AILanguageModelPromptRole { "user", "assistant" };

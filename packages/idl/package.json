@@ -1,0 +1,13 @@
+{
+  "name": "@types/idl",
+  "version": "0.0.1",
+  "description": "TypeScript definitions for experimental APIs translated from Web IDL",
+  "main": "",
+  "types": "index.d.ts",
+  "scripts": {
+    "generate": "webidl2ts -i ./prompt-api.idl -o ./prompt-api.d.ts"
+  },
+  "devDependencies": {
+    "webidl2ts": "github:giniedp/webidl2ts"
+  }
+}
