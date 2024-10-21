@@ -320,6 +320,9 @@ importers:
       '@extension/vite-config':
         specifier: workspace:*
         version: link:../../packages/vite-config
+      '@types/idl':
+        specifier: workspace:*
+        version: link:../../packages/idl
       concurrently:
         specifier: ^8.2.2
         version: 8.2.2

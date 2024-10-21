@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import App from '@src/App';
 import tailwindcssOutput from '../dist/tailwind-output.css?inline';
 import '@extension/shared/lib/scheduler';
+import Popover from './Popover';
 
 // Function to find and highlight acronyms
 async function highlightAcronyms() {
@@ -25,7 +26,46 @@ async function highlightAcronyms() {
         mark.textContent = match;
         mark.style.backgroundColor = 'yellow';
         mark.style.color = 'black';
-        fragment.appendChild(mark);
+
+        // Create a container for the mark and the React component
+        const container = document.createElement('span');
+        container.style.position = 'relative';
+        container.appendChild(mark);
+
+        // Add hover event listeners
+        container.addEventListener('mouseenter', () => {
+          // Guard clause to prevent adding the popover twice
+          if (container.querySelector('.popover-container')) return;
+
+          const shadowRootContainer = document.createElement('div');
+          shadowRootContainer.className = 'popover-container';
+          shadowRootContainer.style.position = 'absolute';
+          shadowRootContainer.style.top = '100%';
+          shadowRootContainer.style.left = '0';
+          shadowRootContainer.style.zIndex = '1000';
+          container.appendChild(shadowRootContainer);
+
+          const shadowRoot = shadowRootContainer.attachShadow({ mode: 'open' });
+
+          // Add styles to the shadow DOM
+          const style = document.createElement('style');
+          style.innerHTML = tailwindcssOutput;
+          shadowRoot.appendChild(style);
+
+          const reactRoot = document.createElement('div');
+          shadowRoot.appendChild(reactRoot);
+
+          // Render the React component
+          createRoot(reactRoot).render(
+            <Popover
+              acronym={match}
+              context={nodeValue}
+              removeFromDOM={() => requestAnimationFrame(() => container.removeChild(shadowRootContainer))}
+            />,
+          );
+        });
+
+        fragment.appendChild(container);
 
         lastIndex = offset + match.length;
         if (!highlightedAcronyms.has(match)) {
@@ -62,26 +102,27 @@ async function highlightAcronyms() {
 scheduler.postTask(highlightAcronyms, { priority: 'user-visible' });
 
 // Re-run the function when new nodes are added or text content changes
-const observer = new MutationObserver(mutations => {
-  let shouldHighlight = false;
-  for (const mutation of mutations) {
-    if (mutation.type === 'childList') {
-      const addedNodes = Array.from(mutation.addedNodes);
-      if (addedNodes.some(node => node.nodeType === Node.ELEMENT_NODE && !(node as Element).closest('mark'))) {
-        shouldHighlight = true;
-        break;
-      }
-    } else if (mutation.type === 'characterData' && mutation.target.nodeType === Node.TEXT_NODE) {
-      shouldHighlight = true;
-      break;
-    }
-  }
-  if (shouldHighlight) {
-    console.log('Mutation detected, re-running highlightAcronyms');
-    scheduler.postTask(highlightAcronyms, { priority: 'user-visible' });
-  }
-});
-observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+// this causes things to rerun forever...
+// const observer = new MutationObserver(mutations => {
+//   let shouldHighlight = false;
+//   for (const mutation of mutations) {
+//     if (mutation.type === 'childList') {
+//       const addedNodes = Array.from(mutation.addedNodes);
+//       if (addedNodes.some(node => node.nodeType === Node.ELEMENT_NODE && !(node as Element).closest('mark'))) {
+//         shouldHighlight = true;
+//         break;
+//       }
+//     } else if (mutation.type === 'characterData' && mutation.target.nodeType === Node.TEXT_NODE) {
+//       shouldHighlight = true;
+//       break;
+//     }
+//   }
+//   if (shouldHighlight) {
+//     console.log('Mutation detected, re-running highlightAcronyms');
+//     scheduler.postTask(highlightAcronyms, { priority: 'user-visible' });
+//   }
+// });
+// observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
 const root = document.createElement('div');
 root.id = 'chrome-extension-boilerplate-react-vite-content-view-root';
