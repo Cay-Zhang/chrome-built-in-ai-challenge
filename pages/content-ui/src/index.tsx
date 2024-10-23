@@ -40,7 +40,7 @@ async function highlightAcronyms() {
           const shadowRootContainer = document.createElement('div');
           shadowRootContainer.className = 'popover-container';
           shadowRootContainer.style.position = 'absolute';
-          shadowRootContainer.style.top = '100%';
+          shadowRootContainer.style.top = '125%';
           shadowRootContainer.style.left = '0';
           shadowRootContainer.style.zIndex = '1000';
           container.appendChild(shadowRootContainer);
