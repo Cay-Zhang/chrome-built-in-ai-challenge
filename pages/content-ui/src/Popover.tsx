@@ -3,6 +3,13 @@ import { Button } from '@extension/ui';
 import { useStorage } from '@extension/shared';
 import { exampleThemeStorage } from '@extension/storage';
 import { motion, AnimatePresence } from 'framer-motion';
+import wiki, { Page } from 'wikijs';
+
+interface PageSection {
+  title: string;
+  content: string;
+  items?: PageSection[];
+}
 
 const AnimatedPopover = ({ isVisible, children }: { isVisible: boolean; children: React.ReactNode }) => (
   <AnimatePresence>
@@ -29,13 +36,16 @@ function PopoverContent({
 }) {
   const theme = useStorage(exampleThemeStorage);
   const [result, setResult] = useState('');
+  const [wikiContent, setWikiContent] = useState<PageSection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const lookup = async () => {
       setIsLoading(true);
       setResult('');
+      setWikiContent([]);
 
+      let value: string | null = '';
       try {
         const model = await ai.languageModel.create();
         const prompt = `What does "${acronym}" mean in "${context}"? If it is an acronym, ONLY output the expanded phrase. Respond in English.`;
@@ -43,7 +53,6 @@ function PopoverContent({
         const stream = model.promptStreaming(prompt);
         const reader = stream.getReader();
 
-        let value = '';
         while (true) {
           const { done, value: _value } = await reader.read();
           if (done) {
@@ -51,14 +60,31 @@ function PopoverContent({
           } else {
             value = _value;
           }
-          setResult(value);
+          setResult(value ?? '');
         }
         console.log(value);
       } catch (error) {
+        value = null;
         console.error('Error:', error);
         setResult('An error occurred while processing the request.');
       } finally {
         setIsLoading(false);
+      }
+
+      // Search wiki for the acronym
+      try {
+        const page: Page & { title: string } = (await wiki({ apiUrl: 'https://en.wikipedia.org/w/api.php' }).find(
+          value ?? acronym,
+        )) as any;
+        if (!(await page.categories()).includes('Category:Disambiguation pages')) {
+          const summary = await page.summary();
+          setWikiContent([{ title: `Summary (${page.title})`, content: summary }]);
+        } else {
+          const content = (await page.content()) as any as PageSection[];
+          setWikiContent(content);
+        }
+      } catch (error) {
+        console.error('Error finding wiki page for acronym', error);
       }
     };
 
@@ -66,7 +92,7 @@ function PopoverContent({
   }, [acronym, context]);
 
   return (
-    <motion.div layout className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 shadow-lg">
+    <motion.div layout className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 shadow-lg min-w-[400px]">
       <div className="self-end">
         <Button
           theme={theme}
@@ -88,6 +114,23 @@ function PopoverContent({
       <div className="flex gap-1 text-center whitespace-nowrap overflow-x-auto">
         {isLoading ? 'Loading...' : result}
       </div>
+      {wikiContent && (
+        <div className="mt-2 text-sm text-gray-600 max-h-52 overflow-y-auto space-y-6">
+          {wikiContent.map((section, i) => (
+            <div key={i} className="mb-6">
+              {section.title && <h3 className="font-medium mb-3">{section.title}</h3>}
+              <p className="mb-4 whitespace-pre-wrap leading-relaxed">{section.content}</p>
+              {section.items &&
+                section.items.map((subsection, j) => (
+                  <div key={j} className="ml-4 mb-4">
+                    {subsection.title && <h4 className="font-medium mb-3">{subsection.title}</h4>}
+                    <p className="leading-relaxed">{subsection.content}</p>
+                  </div>
+                ))}
+            </div>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }

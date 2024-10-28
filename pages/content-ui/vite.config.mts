@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import { makeEntryPointPlugin } from '@extension/hmr';
 import { isDev, withPageConfig } from '@extension/vite-config';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 const rootDir = resolve(__dirname);
 const srcDir = resolve(rootDir, 'src');
@@ -11,7 +12,7 @@ export default withPageConfig({
       '@src': srcDir,
     },
   },
-  plugins: [isDev && makeEntryPointPlugin()],
+  plugins: [isDev && makeEntryPointPlugin(), nodePolyfills()],
   publicDir: resolve(rootDir, 'public'),
   build: {
     lib: {

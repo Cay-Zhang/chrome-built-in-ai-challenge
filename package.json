@@ -34,7 +34,8 @@
     "eslint-plugin-tailwindcss": "^3.17.4",
     "framer-motion": "^11.11.9",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "wikijs": "^6.4.1"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.270",
@@ -63,7 +64,8 @@
     "tslib": "^2.6.3",
     "turbo": "^2.0.12",
     "typescript": "5.5.4",
-    "vite": "5.4.3"
+    "vite": "5.4.3",
+    "vite-plugin-node-polyfills": "^0.22.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json}": [
