@@ -84,7 +84,7 @@ export function Wiki({ acronym, context }: { acronym: string; context: string })
     <motion.div layout>
       <div className="flex gap-1 text-center whitespace-nowrap overflow-x-auto">{isLoading ? acronym : result}</div>
       {wikiContent && (
-        <div className="mt-2 text-sm text-gray-600 max-h-52 overflow-y-auto space-y-6">
+        <div className="mt-2 text-sm max-h-52 overflow-y-auto space-y-6">
           {wikiContent.map((section, i) => (
             <div key={i} className="mb-6">
               {section.title && <h3 className="font-medium mb-3">{section.title}</h3>}

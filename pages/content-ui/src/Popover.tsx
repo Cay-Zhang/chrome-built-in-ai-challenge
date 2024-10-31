@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@extension/ui';
+import { Button, TabsTrigger, Tabs, TabsContent, TabsList } from '@extension/ui';
 import { useStorage } from '@extension/shared';
 import { exampleThemeStorage } from '@extension/storage';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,13 +28,13 @@ function PopoverContent({
   acronym: string;
   context: string;
 }) {
-  const theme = useStorage(exampleThemeStorage);
-
   return (
-    <motion.div layout className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 shadow-lg min-w-[400px]">
+    <motion.div
+      layout
+      className="flex flex-col items-center gap-2 rounded-2xl bg-background p-4 shadow-lg min-w-[400px]">
       <div className="self-end">
         <Button
-          theme={theme}
+          variant="secondary"
           className="p-1"
           onClick={event => {
             event.preventDefault();
@@ -50,12 +50,22 @@ function PopoverContent({
           </svg>
         </Button>
       </div>
-      <Wiki acronym={acronym} context={context} />
+      <Tabs defaultValue="wiki" className="w-[400px]">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="wiki">Wiki</TabsTrigger>
+          <TabsTrigger value="oxford">Oxford</TabsTrigger>
+        </TabsList>
+        <TabsContent value="wiki">
+          <Wiki acronym={acronym} context={context} />
+        </TabsContent>
+        <TabsContent value="oxford">Oxford</TabsContent>
+      </Tabs>
     </motion.div>
   );
 }
 
 export default function Popover(props: { removeFromDOM: () => void; acronym: string; context: string }) {
+  const theme = useStorage(exampleThemeStorage);
   const [isVisible, setIsVisible] = useState(true);
 
   const handleClose = () => {
@@ -64,8 +74,10 @@ export default function Popover(props: { removeFromDOM: () => void; acronym: str
   };
 
   return (
-    <AnimatedPopover isVisible={isVisible}>
-      <PopoverContent {...props} removeFromDOM={handleClose} />
-    </AnimatedPopover>
+    <div className={theme === 'dark' ? 'dark text-foreground' : 'text-foreground'}>
+      <AnimatedPopover isVisible={isVisible}>
+        <PopoverContent {...props} removeFromDOM={handleClose} />
+      </AnimatedPopover>
+    </div>
   );
 }
