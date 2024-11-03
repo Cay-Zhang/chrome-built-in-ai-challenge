@@ -39,6 +39,7 @@
     "wikijs": "^6.4.1"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.15",
     "@types/chrome": "^0.0.270",
     "@types/node": "^20.16.5",
     "@types/react": "^18.3.3",

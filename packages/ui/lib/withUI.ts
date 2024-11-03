@@ -2,12 +2,14 @@ import deepmerge from 'deepmerge';
 import type { Config } from 'tailwindcss/types/config';
 import { fontFamily } from 'tailwindcss/defaultTheme';
 import tailwindAnimate from 'tailwindcss-animate';
+import tailwindTypography from '@tailwindcss/typography';
 
 export function withUI(tailwindConfig: Config): Config {
   return deepmerge(
     shadcnConfig,
     deepmerge(tailwindConfig, {
       content: ['./node_modules/@extension/ui/lib/**/*.{tsx,ts,js,jsx}'],
+      plugins: [tailwindTypography],
     }),
   );
 }
