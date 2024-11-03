@@ -4,6 +4,7 @@ import { useStorage } from '@extension/shared';
 import { exampleThemeStorage } from '@extension/storage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wiki } from './Wiki';
+import { AI } from './AI';
 
 const AnimatedPopover = ({ isVisible, children }: { isVisible: boolean; children: React.ReactNode }) => (
   <AnimatePresence>
@@ -50,15 +51,17 @@ function PopoverContent({
           </svg>
         </Button>
       </div>
-      <Tabs defaultValue="wiki" className="w-[400px]">
+      <Tabs defaultValue="ai" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="wiki">Wiki</TabsTrigger>
-          <TabsTrigger value="oxford">Oxford</TabsTrigger>
+          <TabsTrigger value="ai">AI</TabsTrigger>
         </TabsList>
         <TabsContent value="wiki">
           <Wiki acronym={acronym} context={context} />
         </TabsContent>
-        <TabsContent value="oxford">Oxford</TabsContent>
+        <TabsContent value="ai">
+          <AI acronym={acronym} context={context} />
+        </TabsContent>
       </Tabs>
     </motion.div>
   );
