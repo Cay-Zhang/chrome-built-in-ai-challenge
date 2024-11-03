@@ -4,6 +4,8 @@ import tailwindcssOutput from '../dist/tailwind-output.css?inline';
 import '@extension/shared/lib/scheduler';
 import Popover from './Popover';
 
+const acronymMarkerSymbol = Symbol('acronym-marker');
+
 // Function to find and highlight acronyms
 async function highlightAcronyms() {
   const acronymRegex = /\b[A-Z]{2,}\b/g;
@@ -11,6 +13,8 @@ async function highlightAcronyms() {
 
   // Function to process a single text node
   function processTextNode(node: Text) {
+    if ((node as any)[acronymMarkerSymbol]) return;
+
     const matches = node.nodeValue?.match(acronymRegex);
     if (matches && node.parentNode) {
       const fragment = document.createDocumentFragment();
@@ -26,6 +30,8 @@ async function highlightAcronyms() {
         mark.textContent = match;
         mark.style.backgroundColor = 'yellow';
         mark.style.color = 'black';
+
+        (mark.firstChild as Text as any)[acronymMarkerSymbol] = true;
 
         // Create a container for the mark and the React component
         const container = document.createElement('span');
@@ -82,47 +88,69 @@ async function highlightAcronyms() {
     }
   }
 
-  // Use TreeWalker to iterate through text nodes
-  const treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  // Function to process new nodes
+  async function processNewNodes(nodes: Node[]) {
+    for (const node of nodes) {
+      // Skip our own elements
+      if (node instanceof Element && (node.closest('mark') || node.classList.contains('popover-container'))) {
+        continue;
+      }
 
+      if (node.nodeType === Node.TEXT_NODE) {
+        processTextNode(node as Text);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        // Process child text nodes
+        const treeWalker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+        let textNode = treeWalker.nextNode();
+        while (textNode) {
+          processTextNode(textNode as Text);
+          await scheduler.yield({ priority: 'user-visible' });
+          textNode = treeWalker.nextNode();
+        }
+      }
+    }
+  }
+
+  // Initial processing
+  const treeWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let currentNode: Node | null = treeWalker.nextNode();
   while (currentNode) {
     if (currentNode.nodeType === Node.TEXT_NODE) {
       processTextNode(currentNode as Text);
     }
-
-    // Yield to the main thread after processing each node
-    await scheduler.yield({ priority: 'user-blocking' });
-
+    await scheduler.yield({ priority: 'user-visible' });
     currentNode = treeWalker.nextNode();
   }
+
+  // Set up mutation observer for dynamic content
+  const observer = new MutationObserver(mutations => {
+    const newNodes: Node[] = [];
+
+    for (const mutation of mutations) {
+      // Handle added nodes
+      if (mutation.type === 'childList') {
+        newNodes.push(...Array.from(mutation.addedNodes));
+      }
+      // Handle text changes
+      else if (mutation.type === 'characterData' && mutation.target.nodeType === Node.TEXT_NODE) {
+        newNodes.push(mutation.target);
+      }
+    }
+
+    if (newNodes.length > 0) {
+      scheduler.postTask(() => processNewNodes(newNodes), { priority: 'user-visible' });
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
 }
 
 // Run the function when the content script loads
 scheduler.postTask(highlightAcronyms, { priority: 'user-visible' });
-
-// Re-run the function when new nodes are added or text content changes
-// this causes things to rerun forever...
-// const observer = new MutationObserver(mutations => {
-//   let shouldHighlight = false;
-//   for (const mutation of mutations) {
-//     if (mutation.type === 'childList') {
-//       const addedNodes = Array.from(mutation.addedNodes);
-//       if (addedNodes.some(node => node.nodeType === Node.ELEMENT_NODE && !(node as Element).closest('mark'))) {
-//         shouldHighlight = true;
-//         break;
-//       }
-//     } else if (mutation.type === 'characterData' && mutation.target.nodeType === Node.TEXT_NODE) {
-//       shouldHighlight = true;
-//       break;
-//     }
-//   }
-//   if (shouldHighlight) {
-//     console.log('Mutation detected, re-running highlightAcronyms');
-//     scheduler.postTask(highlightAcronyms, { priority: 'user-visible' });
-//   }
-// });
-// observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
 const root = document.createElement('div');
 root.id = 'chrome-extension-boilerplate-react-vite-content-view-root';
