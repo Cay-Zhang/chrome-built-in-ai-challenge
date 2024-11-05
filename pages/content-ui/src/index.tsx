@@ -5,6 +5,7 @@ import '@extension/shared/lib/scheduler';
 import Popover from './Popover';
 
 const acronymMarkerSymbol = Symbol('acronym-marker');
+let popoverId = 0;
 
 // Function to find and highlight acronyms
 async function highlightAcronyms() {
@@ -43,13 +44,23 @@ async function highlightAcronyms() {
           // Guard clause to prevent adding the popover twice
           if (container.querySelector('.popover-container')) return;
 
+          mark.style.anchorName = '--acronym' + popoverId;
+
           const shadowRootContainer = document.createElement('div');
+          shadowRootContainer.setAttribute('popover', 'auto');
           shadowRootContainer.className = 'popover-container';
           shadowRootContainer.style.position = 'absolute';
-          shadowRootContainer.style.top = '125%';
-          shadowRootContainer.style.left = '0';
-          shadowRootContainer.style.zIndex = '1000';
+          shadowRootContainer.style.positionAnchor = '--acronym' + popoverId;
+          shadowRootContainer.style.positionArea = 'bottom';
+          shadowRootContainer.style.borderStyle = 'none';
+          shadowRootContainer.style.backgroundColor = 'transparent';
+          shadowRootContainer.style.margin = '0';
+          shadowRootContainer.style.overflow = 'unset';
+          shadowRootContainer.style.positionTryFallbacks = 'flip-block';
           container.appendChild(shadowRootContainer);
+          shadowRootContainer.showPopover();
+
+          popoverId += 1;
 
           const shadowRoot = shadowRootContainer.attachShadow({ mode: 'open' });
 
