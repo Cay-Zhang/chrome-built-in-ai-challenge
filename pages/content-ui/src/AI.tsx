@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import { runtime } from '@extension/shared/lib/rpc/client';
 
 const initialPrompts: NonNullable<AILanguageModelCreateOptions['initialPrompts']> = [
   {
@@ -84,7 +85,7 @@ URL of the Web Page:
 "${pageUrl}"
 
 Title of the Web Page:
-N/A
+"${(await runtime.getCurrentTabTitle()) ?? 'N/A'}"
 `;
 }
 
