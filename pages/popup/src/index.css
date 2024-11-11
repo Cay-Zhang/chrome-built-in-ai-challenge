@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "@extension/ui/lib/global.css";
 
 body {
   width: 300px;

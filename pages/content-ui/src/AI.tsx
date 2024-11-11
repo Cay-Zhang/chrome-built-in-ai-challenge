@@ -89,7 +89,7 @@ Title of the Web Page:
 `;
 }
 
-export function AI({ acronym, context }: { acronym: string; context: string }) {
+export function AI({ acronym, context, ai }: { acronym: string; context: string; ai: typeof window.ai }) {
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 

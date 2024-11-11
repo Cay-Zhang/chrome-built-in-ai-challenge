@@ -1,6 +1,7 @@
 import '@src/Popup.css';
 import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage } from '@extension/storage';
+import { exampleThemeStorage, openRouterApiKeyStorage } from '@extension/storage';
+import { Input } from '@extension/ui';
 import type { ComponentPropsWithoutRef } from 'react';
 
 const notificationOptions = {
@@ -12,6 +13,7 @@ const notificationOptions = {
 
 const Popup = () => {
   const theme = useStorage(exampleThemeStorage);
+  const openRouterApiKey = useStorage(openRouterApiKeyStorage);
   const isLight = theme === 'light';
   const logo = isLight ? 'popup/logo_vertical.svg' : 'popup/logo_vertical_dark.svg';
   const goGithubSite = () =>
@@ -38,7 +40,8 @@ const Popup = () => {
   };
 
   return (
-    <div className={`App ${isLight ? 'bg-slate-50' : 'bg-gray-800'}`}>
+    <div
+      className={`App ${isLight ? 'bg-slate-50' : 'bg-gray-800'} ${theme === 'dark' ? 'dark text-foreground' : 'text-foreground'}`}>
       <header className={`App-header ${isLight ? 'text-gray-900' : 'text-gray-100'}`}>
         <button onClick={goGithubSite}>
           <img src={chrome.runtime.getURL(logo)} className="App-logo" alt="logo" />
@@ -55,6 +58,18 @@ const Popup = () => {
           Click to inject Content Script
         </button>
         <ToggleButton>Toggle theme</ToggleButton>
+        <div className="mt-4 flex flex-col gap-2">
+          <label htmlFor="api-key" className={`text-sm font-medium ${isLight ? 'text-gray-900' : 'text-gray-100'}`}>
+            OpenRouter API Key
+          </label>
+          <Input
+            id="api-key"
+            type="password"
+            placeholder="Enter API key"
+            value={openRouterApiKey ?? ''}
+            onChange={e => openRouterApiKeyStorage.set(e.target.value || null)}
+          />
+        </div>
       </header>
     </div>
   );

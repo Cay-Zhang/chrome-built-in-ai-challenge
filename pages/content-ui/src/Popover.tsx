@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button, TabsTrigger, Tabs, TabsContent, TabsList } from '@extension/ui';
-import { useStorage } from '@extension/shared';
-import { exampleThemeStorage } from '@extension/storage';
+import { openRouterLanguageModel, useStorage } from '@extension/shared';
+import { exampleThemeStorage, openRouterApiKeyStorage } from '@extension/storage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wiki } from './Wiki';
 import { AI } from './AI';
@@ -29,6 +29,7 @@ function PopoverContent({
   acronym: string;
   context: string;
 }) {
+  const openRouterApiKey = useStorage(openRouterApiKeyStorage);
   return (
     <motion.div
       layout
@@ -60,7 +61,21 @@ function PopoverContent({
           <Wiki acronym={acronym} context={context} />
         </TabsContent>
         <TabsContent value="ai">
-          <AI acronym={acronym} context={context} />
+          <AI
+            acronym={acronym}
+            context={context}
+            ai={
+              openRouterApiKey
+                ? {
+                    ...ai,
+                    languageModel: openRouterLanguageModel({
+                      model: 'chatgpt-4o-latest',
+                      apiKey: openRouterApiKey,
+                    }),
+                  }
+                : ai
+            }
+          />
         </TabsContent>
       </Tabs>
     </motion.div>

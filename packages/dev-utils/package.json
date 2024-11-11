@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@extension/tsconfig": "workspace:*",
-    "@extension/shared": "workspace:*"
+    "@extension/shared": "workspace:*",
+    "@types/idl": "workspace:*"
   }
 }

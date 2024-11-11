@@ -33,6 +33,7 @@
   "dependencies": {
     "eslint-plugin-tailwindcss": "^3.17.4",
     "framer-motion": "^11.11.9",
+    "openai": "^4.71.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-markdown": "^9.0.1",
