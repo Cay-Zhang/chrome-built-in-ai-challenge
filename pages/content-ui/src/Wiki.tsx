@@ -15,7 +15,7 @@ async function isCorrectPage({ page, acronym }: { page: Page; acronym: string })
   return Boolean(isNotDisambiguationPage && summaryIncludesAcronym);
 }
 
-export function Wiki({ acronym, context }: { acronym: string; context: string }) {
+export function Wiki({ acronym, context, ai }: { acronym: string; context: string; ai: typeof window.ai }) {
   const [result, setResult] = useState('');
   const [wikiContent, setWikiContent] = useState<PageSection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +78,7 @@ export function Wiki({ acronym, context }: { acronym: string; context: string })
     };
 
     lookup();
-  }, [acronym, context]);
+  }, [acronym, context, ai]);
 
   return (
     <motion.div layout>

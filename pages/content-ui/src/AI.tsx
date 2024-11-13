@@ -128,7 +128,7 @@ export function AI({ acronym, context, ai }: { acronym: string; context: string;
     };
 
     lookup();
-  }, [acronym, context]);
+  }, [acronym, context, ai]);
 
   return (
     <motion.div layout>
