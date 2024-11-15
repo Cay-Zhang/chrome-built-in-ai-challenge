@@ -9,7 +9,7 @@ let popoverId = 0;
 
 // Function to find and highlight acronyms
 async function highlightAcronyms() {
-  const acronymRegex = /\b[A-Z]{2,}\b/g;
+  const acronymRegex = /\b(?:[A-Z][A-Za-z0-9]*[A-Z][A-Za-z0-9]*)\b/g;
   const highlightedAcronyms = new Set();
 
   // Function to process a single text node
@@ -56,7 +56,7 @@ async function highlightAcronyms() {
           shadowRootContainer.style.backgroundColor = 'transparent';
           shadowRootContainer.style.margin = '0';
           shadowRootContainer.style.overflow = 'unset';
-          shadowRootContainer.style.positionTryFallbacks = 'flip-block';
+          // shadowRootContainer.style.positionTryFallbacks = 'flip-block';
           container.appendChild(shadowRootContainer);
           shadowRootContainer.showPopover();
 
