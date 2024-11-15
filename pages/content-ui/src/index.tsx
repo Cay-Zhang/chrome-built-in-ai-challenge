@@ -7,6 +7,115 @@ import Popover from './Popover';
 const acronymMarkerSymbol = Symbol('acronym-marker');
 let popoverId = 0;
 
+function showAcronymPopover({
+  structuredContainer,
+  acronym,
+  context,
+}: {
+  structuredContainer: HTMLSpanElement;
+  acronym?: string;
+  context?: string;
+}) {
+  if (structuredContainer.querySelector('.popover-container')) return;
+
+  acronym ??= structuredContainer.textContent!;
+  context ??= structuredContainer.parentElement?.textContent ?? acronym;
+
+  const mark = structuredContainer.querySelector('mark');
+  if (!mark) return;
+
+  mark.style.anchorName = '--acronym' + popoverId;
+
+  const shadowRootContainer = document.createElement('div');
+  shadowRootContainer.setAttribute('popover', 'auto');
+  shadowRootContainer.className = 'popover-container';
+  shadowRootContainer.style.position = 'absolute';
+  shadowRootContainer.style.positionAnchor = '--acronym' + popoverId;
+  shadowRootContainer.style.positionArea = 'bottom';
+  shadowRootContainer.style.borderStyle = 'none';
+  shadowRootContainer.style.backgroundColor = 'transparent';
+  shadowRootContainer.style.margin = '0';
+  shadowRootContainer.style.overflow = 'unset';
+  // shadowRootContainer.style.positionTryFallbacks = 'flip-block';
+  structuredContainer.appendChild(shadowRootContainer);
+  shadowRootContainer.showPopover();
+
+  popoverId += 1;
+
+  const shadowRoot = shadowRootContainer.attachShadow({ mode: 'open' });
+
+  // Add styles to the shadow DOM
+  const style = document.createElement('style');
+  style.innerHTML = tailwindcssOutput;
+  shadowRoot.appendChild(style);
+
+  const reactRoot = document.createElement('div');
+  shadowRoot.appendChild(reactRoot);
+
+  // Render the React component
+  createRoot(reactRoot).render(
+    <Popover
+      acronym={acronym}
+      context={context}
+      removeFromDOM={() => requestAnimationFrame(() => structuredContainer.removeChild(shadowRootContainer))}
+    />,
+  );
+}
+
+// pure function to create structured containers for a list of ranges contained in one common text ancestor
+function createStructuredContainers(ranges: Range[]) {
+  if (ranges.length === 0) return null;
+
+  const fragment = document.createDocumentFragment();
+  const structuredContainers: HTMLSpanElement[] = [];
+
+  const node = ranges[0].commonAncestorContainer as Text;
+  const nodeValue = node.nodeValue ?? '';
+  let lastIndex = 0;
+
+  // Sort ranges by start offset
+  const sortedRanges = [...ranges].sort((a, b) => a.startOffset - b.startOffset);
+
+  for (const range of sortedRanges) {
+    const startOffset = range.startOffset;
+    const endOffset = range.endOffset;
+    const text = nodeValue.slice(startOffset, endOffset);
+
+    // Add text before the match
+    if (startOffset > lastIndex) {
+      fragment.appendChild(document.createTextNode(nodeValue.slice(lastIndex, startOffset)));
+    }
+
+    // Create the highlighted span
+    const mark = document.createElement('mark');
+    mark.textContent = text;
+    mark.style.backgroundColor = 'yellow';
+    mark.style.color = 'black';
+
+    (mark.firstChild as Text as any)[acronymMarkerSymbol] = true;
+
+    // Create a container for the mark
+    const container = document.createElement('span');
+    container.style.position = 'relative';
+    container.appendChild(mark);
+
+    fragment.appendChild(container);
+    structuredContainers.push(container);
+
+    lastIndex = endOffset;
+  }
+
+  // Add any remaining text after the last match
+  if (lastIndex < nodeValue.length) {
+    fragment.appendChild(document.createTextNode(nodeValue.slice(lastIndex)));
+  }
+
+  return {
+    documentFragment: fragment,
+    structuredContainers,
+  };
+}
+
 // Function to find and highlight acronyms
 async function highlightAcronyms() {
   const acronymRegex = /\b(?:[A-Z][A-Za-z0-9]*[A-Z][A-Za-z0-9]*)\b/g;
@@ -16,86 +125,35 @@ async function highlightAcronyms() {
   function processTextNode(node: Text) {
     if ((node as any)[acronymMarkerSymbol]) return;
 
-    const matches = node.nodeValue?.match(acronymRegex);
-    if (matches && node.parentNode) {
-      const fragment = document.createDocumentFragment();
-      let lastIndex = 0;
-      const nodeValue = node.nodeValue ?? ''; // Use nullish coalescing
-      nodeValue.replace(acronymRegex, (match, offset) => {
-        // Add text before the match
-        if (offset > lastIndex) {
-          fragment.appendChild(document.createTextNode(nodeValue.slice(lastIndex, offset)));
-        }
-        // Create the highlighted span
-        const mark = document.createElement('mark');
-        mark.textContent = match;
-        mark.style.backgroundColor = 'yellow';
-        mark.style.color = 'black';
+    const matches = Array.from(node.nodeValue?.matchAll(acronymRegex) ?? []);
+    if (matches.length > 0 && node.parentNode) {
+      // Create ranges for each match
+      const ranges = matches.map(match => {
+        const range = document.createRange();
+        range.setStart(node, match.index);
+        range.setEnd(node, match.index + match[0].length);
+        return range;
+      });
 
-        (mark.firstChild as Text as any)[acronymMarkerSymbol] = true;
+      const result = createStructuredContainers(ranges);
+      if (!result) return;
 
-        // Create a container for the mark and the React component
-        const container = document.createElement('span');
-        container.style.position = 'relative';
-        container.appendChild(mark);
+      const { documentFragment, structuredContainers } = result;
 
-        // Add hover event listeners
-        container.addEventListener('mouseenter', () => {
-          // Guard clause to prevent adding the popover twice
-          if (container.querySelector('.popover-container')) return;
+      // Add event listeners to the structuredContainers
+      structuredContainers.forEach((container, index) => {
+        const match = matches[index][0];
+        container.addEventListener('mouseenter', () =>
+          showAcronymPopover({ structuredContainer: container, acronym: match, context: node.nodeValue ?? '' }),
+        );
 
-          mark.style.anchorName = '--acronym' + popoverId;
-
-          const shadowRootContainer = document.createElement('div');
-          shadowRootContainer.setAttribute('popover', 'auto');
-          shadowRootContainer.className = 'popover-container';
-          shadowRootContainer.style.position = 'absolute';
-          shadowRootContainer.style.positionAnchor = '--acronym' + popoverId;
-          shadowRootContainer.style.positionArea = 'bottom';
-          shadowRootContainer.style.borderStyle = 'none';
-          shadowRootContainer.style.backgroundColor = 'transparent';
-          shadowRootContainer.style.margin = '0';
-          shadowRootContainer.style.overflow = 'unset';
-          // shadowRootContainer.style.positionTryFallbacks = 'flip-block';
-          container.appendChild(shadowRootContainer);
-          shadowRootContainer.showPopover();
-
-          popoverId += 1;
-
-          const shadowRoot = shadowRootContainer.attachShadow({ mode: 'open' });
-
-          // Add styles to the shadow DOM
-          const style = document.createElement('style');
-          style.innerHTML = tailwindcssOutput;
-          shadowRoot.appendChild(style);
-
-          const reactRoot = document.createElement('div');
-          shadowRoot.appendChild(reactRoot);
-
-          // Render the React component
-          createRoot(reactRoot).render(
-            <Popover
-              acronym={match}
-              context={nodeValue}
-              removeFromDOM={() => requestAnimationFrame(() => container.removeChild(shadowRootContainer))}
-            />,
-          );
-        });
-
-        fragment.appendChild(container);
-
-        lastIndex = offset + match.length;
         if (!highlightedAcronyms.has(match)) {
           console.log('New acronym found:', match);
           highlightedAcronyms.add(match);
         }
-        return match;
       });
-      // Add any remaining text after the last match
-      if (lastIndex < nodeValue.length) {
-        fragment.appendChild(document.createTextNode(nodeValue.slice(lastIndex)));
-      }
-      requestAnimationFrame(() => node.parentNode?.replaceChild(fragment, node));
+
+      requestAnimationFrame(() => node.parentNode?.replaceChild(documentFragment, node));
     }
   }
 
