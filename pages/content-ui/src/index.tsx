@@ -250,3 +250,32 @@ if (navigator.userAgent.includes('Firefox')) {
 
 shadowRoot.appendChild(rootIntoShadow);
 createRoot(rootIntoShadow).render(<App />);
+
+// Add command key long press handler
+let commandKeyTimer: number | null = null;
+const LONG_PRESS_DURATION = 2000; // 2 seconds
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Meta' && !commandKeyTimer) {
+    commandKeyTimer = window.setTimeout(() => {
+      const selection = window.getSelection();
+      if (selection && !selection.isCollapsed) {
+        const range = selection.getRangeAt(0);
+        const result = createStructuredContainers([range]);
+
+        if (result) {
+          const { documentFragment, structuredContainers } = result;
+          range.commonAncestorContainer.parentNode?.replaceChild(documentFragment, range.commonAncestorContainer);
+          showAcronymPopover({ structuredContainer: structuredContainers[0] });
+        }
+      }
+    }, LONG_PRESS_DURATION);
+  }
+});
+
+document.addEventListener('keyup', e => {
+  if (e.key === 'Meta' && commandKeyTimer) {
+    clearTimeout(commandKeyTimer);
+    commandKeyTimer = null;
+  }
+});
