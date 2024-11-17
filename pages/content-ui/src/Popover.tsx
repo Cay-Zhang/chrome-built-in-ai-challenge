@@ -28,20 +28,6 @@ const models: { model: Model; label: string }[] = [
   { model: '_builtin', label: 'Built-in' },
 ];
 
-const AnimatedPopover = ({ isVisible, children }: { isVisible: boolean; children: React.ReactNode }) => (
-  <AnimatePresence>
-    {isVisible && (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        transition={{ type: 'spring', duration: 0.3, bounce: 0 }}>
-        {children}
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
-
 function PopoverContent({
   removeFromDOM,
   acronym,
@@ -154,9 +140,17 @@ export default function Popover(props: { removeFromDOM: () => void; acronym: str
   return (
     <PopoverContainerContext.Provider value={{ containerRef: popoverContainerRef }}>
       <div ref={popoverContainerRef} className={theme === 'dark' ? 'text-foreground dark' : 'text-foreground'}>
-        <AnimatedPopover isVisible={isVisible}>
-          <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
-        </AnimatedPopover>
+        <AnimatePresence>
+          {isVisible && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ type: 'spring', duration: 0.3, bounce: 0 }}>
+              <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </PopoverContainerContext.Provider>
   );
