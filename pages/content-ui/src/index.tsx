@@ -9,10 +9,12 @@ let popoverId = 0;
 
 function showAcronymPopover({
   structuredContainer,
+  expandImmediately,
   acronym,
   context,
 }: {
   structuredContainer: HTMLSpanElement;
+  expandImmediately: boolean;
   acronym?: string;
   context?: string;
 }) {
@@ -32,6 +34,7 @@ function showAcronymPopover({
   shadowRootContainer.style.position = 'absolute';
   shadowRootContainer.style.positionAnchor = '--acronym' + popoverId;
   shadowRootContainer.style.positionArea = 'bottom';
+  shadowRootContainer.style.minWidth = 'anchor-size(width)';
   shadowRootContainer.style.borderStyle = 'none';
   shadowRootContainer.style.backgroundColor = 'transparent';
   shadowRootContainer.style.margin = '0';
@@ -58,6 +61,7 @@ function showAcronymPopover({
       acronym={acronym}
       context={context}
       removeFromDOM={() => requestAnimationFrame(() => structuredContainer.removeChild(shadowRootContainer))}
+      expandImmediately={expandImmediately}
     />,
   );
 }
@@ -144,7 +148,12 @@ async function highlightAcronyms() {
       structuredContainers.forEach((container, index) => {
         const match = matches[index][0];
         container.addEventListener('mouseenter', () =>
-          showAcronymPopover({ structuredContainer: container, acronym: match, context: node.nodeValue ?? '' }),
+          showAcronymPopover({
+            structuredContainer: container,
+            expandImmediately: true,
+            acronym: match,
+            context: node.nodeValue ?? '',
+          }),
         );
 
         if (!highlightedAcronyms.has(match)) {
@@ -251,31 +260,13 @@ if (navigator.userAgent.includes('Firefox')) {
 shadowRoot.appendChild(rootIntoShadow);
 createRoot(rootIntoShadow).render(<App />);
 
-// Add command key long press handler
-let commandKeyTimer: number | null = null;
-const LONG_PRESS_DURATION = 2000; // 2 seconds
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Meta' && !commandKeyTimer) {
-    commandKeyTimer = window.setTimeout(() => {
-      const selection = window.getSelection();
-      if (selection && !selection.isCollapsed) {
-        const range = selection.getRangeAt(0);
-        const result = createStructuredContainers([range]);
-
-        if (result) {
-          const { documentFragment, structuredContainers } = result;
-          range.commonAncestorContainer.parentNode?.replaceChild(documentFragment, range.commonAncestorContainer);
-          showAcronymPopover({ structuredContainer: structuredContainers[0] });
-        }
-      }
-    }, LONG_PRESS_DURATION);
-  }
-});
-
-document.addEventListener('keyup', e => {
-  if (e.key === 'Meta' && commandKeyTimer) {
-    clearTimeout(commandKeyTimer);
-    commandKeyTimer = null;
-  }
+document.addEventListener('pointerup', e => {
+  const selection = window.getSelection();
+  if (!selection || selection.isCollapsed) return;
+  const range = selection.getRangeAt(0);
+  const result = createStructuredContainers([range]);
+  if (!result) return;
+  const { documentFragment, structuredContainers } = result;
+  range.commonAncestorContainer.parentNode?.replaceChild(documentFragment, range.commonAncestorContainer);
+  showAcronymPopover({ structuredContainer: structuredContainers[0], expandImmediately: false });
 });

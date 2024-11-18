@@ -57,8 +57,16 @@ function PopoverContent({
   return (
     <motion.div
       layout
-      className="bg-background flex min-w-[400px] flex-col items-center gap-2 rounded-2xl p-4 shadow-lg">
-      <div className="flex justify-between w-full">
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.1 }}
+      className="bg-background flex min-w-[400px] flex-col items-center gap-2 p-4">
+      <motion.div
+        layout="position"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2, delay: 0.3 }}
+        className="flex justify-between w-full">
         <ShadcnPopover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" role="combobox" aria-expanded={open} className="w-[200px] justify-between">
@@ -104,33 +112,47 @@ function PopoverContent({
             />
           </svg>
         </Button>
-      </div>
-      {aiWithSelectedModel ? (
-        <Tabs defaultValue="ai" className="w-[400px]">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="wiki">Wiki</TabsTrigger>
-            <TabsTrigger value="ai">AI</TabsTrigger>
-          </TabsList>
-          <TabsContent value="wiki">
-            <Wiki acronym={acronym} context={context} ai={aiWithSelectedModel} />
-          </TabsContent>
-          <TabsContent value="ai">
-            <AI acronym={acronym} context={context} ai={aiWithSelectedModel} />
-          </TabsContent>
-        </Tabs>
-      ) : (
-        <div className="text-center">
-          {model === '_builtin' ? 'Built-in AI model is not available.' : 'Enter API key to use AI.'}
-        </div>
-      )}
+      </motion.div>
+      <motion.div
+        layout="position"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', duration: 0.3, bounce: 0, delay: 0.5 }}>
+        {aiWithSelectedModel ? (
+          <Tabs defaultValue="ai" className="w-[400px]">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="wiki">Wiki</TabsTrigger>
+              <TabsTrigger value="ai">AI</TabsTrigger>
+            </TabsList>
+            <TabsContent value="wiki">
+              <Wiki acronym={acronym} context={context} ai={aiWithSelectedModel} />
+            </TabsContent>
+            <TabsContent value="ai">
+              <AI acronym={acronym} context={context} ai={aiWithSelectedModel} />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <div className="text-center">
+            {model === '_builtin' ? 'Built-in AI model is not available.' : 'Enter API key to use AI.'}
+          </div>
+        )}
+      </motion.div>
     </motion.div>
   );
 }
 
-export default function Popover(props: { removeFromDOM: () => void; acronym: string; context: string }) {
+export default function Popover(props: {
+  removeFromDOM: () => void;
+  acronym: string;
+  context: string;
+  expandImmediately: boolean;
+}) {
   const theme = useStorage(exampleThemeStorage);
   const [isVisible, setIsVisible] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const popoverContainerRef = useRef<HTMLDivElement>(null);
+
+  useState(() => props.expandImmediately && requestAnimationFrame(() => setIsExpanded(true)));
 
   const handleClose = () => {
     setIsVisible(false);
@@ -143,11 +165,20 @@ export default function Popover(props: { removeFromDOM: () => void; acronym: str
         <AnimatePresence>
           {isVisible && (
             <motion.div
+              layout
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 4 }}
               exit={{ opacity: 0, y: 20 }}
-              transition={{ type: 'spring', duration: 0.3, bounce: 0 }}>
-              <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
+              style={{ height: isExpanded ? 'auto' : 8 }}
+              className="bg-foreground rounded-2xl shadow-lg overflow-hidden"
+              transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
+              onClick={event => {
+                requestAnimationFrame(() => setIsExpanded(true));
+                event.stopPropagation();
+              }}>
+              {isExpanded && (
+                <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
