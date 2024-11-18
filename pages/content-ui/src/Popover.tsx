@@ -60,7 +60,7 @@ function PopoverContent({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.1 }}
-      className="bg-background flex min-w-[400px] flex-col items-center gap-2 p-4">
+      className="bg-background/80 flex min-w-[400px] flex-col items-center gap-2 p-4">
       <motion.div
         layout="position"
         initial={{ opacity: 0, y: 20 }}
@@ -170,7 +170,7 @@ export default function Popover(props: {
               animate={{ opacity: 1, y: 4 }}
               exit={{ opacity: 0, y: 20 }}
               style={{ height: isExpanded ? 'auto' : 8 }}
-              className="bg-foreground rounded-2xl shadow-lg overflow-hidden"
+              className={`backdrop-blur-lg ${isExpanded ? 'bg-foreground/0' : 'bg-foreground/75'} rounded-2xl border border-border/20 shadow-lg overflow-hidden transition-colors duration-200`}
               transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
               onClick={event => {
                 requestAnimationFrame(() => setIsExpanded(true));
