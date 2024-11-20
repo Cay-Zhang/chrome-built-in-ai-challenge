@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import {
   Button,
   TabsTrigger,
@@ -150,7 +150,19 @@ export default function Popover(props: {
   const theme = useStorage(exampleThemeStorage);
   const [isVisible, setIsVisible] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const popoverContainerRef = useRef<HTMLDivElement>(null);
+  const expansionTimeoutRef = useRef<number>();
+
+  const onMouseEnter = useCallback(() => {
+    setIsHovering(true);
+    expansionTimeoutRef.current = window.setTimeout(() => requestAnimationFrame(() => setIsExpanded(true)), 500);
+  }, []);
+
+  const onMouseLeave = useCallback(() => {
+    setIsHovering(false);
+    if (expansionTimeoutRef.current) window.clearTimeout(expansionTimeoutRef.current);
+  }, []);
 
   useState(() => props.expandImmediately && requestAnimationFrame(() => setIsExpanded(true)));
 
@@ -164,22 +176,36 @@ export default function Popover(props: {
       <div ref={popoverContainerRef} className={theme === 'dark' ? 'text-foreground dark' : 'text-foreground'}>
         <AnimatePresence>
           {isVisible && (
-            <motion.div
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 4 }}
-              exit={{ opacity: 0, y: 20 }}
-              style={{ height: isExpanded ? 'auto' : 8 }}
-              className={`backdrop-blur-lg ${isExpanded ? 'bg-foreground/0' : 'bg-foreground/75'} rounded-2xl border border-border/20 shadow-lg overflow-hidden transition-colors duration-200`}
-              transition={{ type: 'spring', duration: 0.5, bounce: 0 }}
-              onClick={event => {
-                requestAnimationFrame(() => setIsExpanded(true));
-                event.stopPropagation();
-              }}>
-              {isExpanded && (
-                <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
-              )}
-            </motion.div>
+            <div
+              className="pb-2 pl-2 pr-2 w-full flex justify-center"
+              onMouseEnter={onMouseEnter}
+              onMouseLeave={onMouseLeave}>
+              <motion.div
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 4 }}
+                exit={{ opacity: 0, y: 20 }}
+                style={{
+                  height: isExpanded ? 'auto' : isHovering ? '20px' : '8px',
+                  width: isExpanded
+                    ? 'auto'
+                    : !isHovering
+                      ? 'clamp(50px, calc(100% + 20px), 320px)'
+                      : 'calc(clamp(50px, calc(100% + 20px), 320px) * 1.25)',
+                  borderRadius: 16,
+                }}
+                className={`backdrop-blur-lg ${isExpanded ? 'bg-foreground/0' : 'bg-foreground/75'} border border-border/20 shadow-lg overflow-hidden transition-colors duration-200 flex-shrink-0`}
+                transition={{
+                  default: { type: 'spring', duration: 0.5, bounce: 0.1 },
+                  layout: isExpanded
+                    ? { type: 'spring', duration: 0.5, bounce: 0.1 }
+                    : { ease: [0.95, 0.05, 0.795, 0.035], duration: 0.5 },
+                }}>
+                {isExpanded && (
+                  <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
+                )}
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>
