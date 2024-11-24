@@ -148,7 +148,7 @@ export default function Popover(props: {
   expandImmediately: boolean;
 }) {
   const theme = useStorage(exampleThemeStorage);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isClosing, setIsClosing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const popoverContainerRef = useRef<HTMLDivElement>(null);
@@ -167,47 +167,45 @@ export default function Popover(props: {
   useState(() => props.expandImmediately && requestAnimationFrame(() => setIsExpanded(true)));
 
   const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(props.removeFromDOM, 300); // Delay removal to allow animation to complete
+    setIsClosing(true);
+    setIsExpanded(false);
+    setTimeout(props.removeFromDOM, 1000); // Delay removal to allow animation to complete
   };
 
   return (
     <PopoverContainerContext.Provider value={{ containerRef: popoverContainerRef }}>
       <div ref={popoverContainerRef} className={theme === 'dark' ? 'text-foreground dark' : 'text-foreground'}>
-        <AnimatePresence>
-          {isVisible && (
-            <div
-              className="pb-2 pl-2 pr-2 w-full flex justify-center"
-              onMouseEnter={onMouseEnter}
-              onMouseLeave={onMouseLeave}>
-              <motion.div
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 4 }}
-                exit={{ opacity: 0, y: 20 }}
-                style={{
-                  height: isExpanded ? 'auto' : isHovering ? '20px' : '8px',
-                  width: isExpanded
-                    ? 'auto'
-                    : !isHovering
-                      ? 'clamp(50px, calc(100% + 20px), 320px)'
-                      : 'calc(clamp(50px, calc(100% + 20px), 320px) * 1.25)',
-                  borderRadius: 16,
-                }}
-                className={`backdrop-blur-lg ${isExpanded ? 'bg-foreground/0' : 'bg-foreground/75'} border border-border/20 shadow-lg overflow-hidden transition-colors duration-200 flex-shrink-0`}
-                transition={{
-                  default: { type: 'spring', duration: 0.5, bounce: 0.1 },
-                  layout: isExpanded
-                    ? { type: 'spring', duration: 0.5, bounce: 0.1 }
-                    : { ease: [0.95, 0.05, 0.795, 0.035], duration: 0.5 },
-                }}>
-                {isExpanded && (
-                  <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
-                )}
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
+        <div
+          className="pb-2 pl-2 pr-2 w-full flex justify-center"
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}>
+          <motion.div
+            layout
+            initial={{ opacity: 0, y: 4, scaleX: 0.2 }}
+            animate={{ opacity: !isClosing ? 1 : 0, y: 4, scaleX: 1 }}
+            style={{
+              height: isExpanded ? 'auto' : isHovering && !isClosing ? '20px' : '8px',
+              width: isExpanded
+                ? 'auto'
+                : !isHovering
+                  ? 'clamp(50px, calc(100% + 20px), 320px)'
+                  : 'calc(clamp(50px, calc(100% + 20px), 320px) * 1.25)',
+              borderRadius: 16,
+            }}
+            className={`backdrop-blur-lg ${isClosing ? 'bg-background/80' : isExpanded || props.expandImmediately ? 'bg-foreground/0' : 'bg-foreground/75'} border border-border/20 shadow-lg overflow-hidden transition-colors duration-200 flex-shrink-0`}
+            transition={{
+              default: { type: 'spring', duration: 0.5, bounce: 0.1 },
+              opacity: isClosing ? { duration: 0.3 } : { duration: 0.5 },
+              layout:
+                isExpanded || isClosing
+                  ? { type: 'spring', duration: 0.5, bounce: 0.1 }
+                  : { ease: [0.95, 0.05, 0.795, 0.035], duration: 0.5 },
+            }}>
+            {isExpanded && (
+              <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
+            )}
+          </motion.div>
+        </div>
       </div>
     </PopoverContainerContext.Provider>
   );
