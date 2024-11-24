@@ -60,7 +60,7 @@ function showAcronymPopover({
     <Popover
       acronym={acronym}
       context={context}
-      removeFromDOM={() => requestAnimationFrame(() => structuredContainer.removeChild(shadowRootContainer))}
+      removeFromDOM={() => requestAnimationFrame(() => revertStructuredContainer(structuredContainer))}
       expandImmediately={expandImmediately}
     />,
   );
@@ -93,8 +93,8 @@ function createStructuredContainers(ranges: Range[]) {
     // Create the highlighted span
     const mark = document.createElement('mark');
     mark.textContent = text;
-    mark.style.backgroundColor = 'yellow';
-    mark.style.color = 'black';
+    mark.style.color = 'unset';
+    mark.style.backgroundColor = 'rgba(0, 105, 209, 0.5)';
 
     (mark.firstChild as Text as any)[acronymMarkerSymbol] = true;
 
@@ -118,6 +118,13 @@ function createStructuredContainers(ranges: Range[]) {
     documentFragment: fragment,
     structuredContainers,
   };
+}
+
+function revertStructuredContainer(structuredContainer: HTMLSpanElement) {
+  const mark = structuredContainer.querySelector('mark');
+  if (!mark) return;
+  const textNode = document.createTextNode(mark.textContent!);
+  structuredContainer.parentElement?.replaceChild(textNode, structuredContainer);
 }
 
 // Function to find and highlight acronyms
@@ -268,5 +275,9 @@ document.addEventListener('pointerup', e => {
   if (!result) return;
   const { documentFragment, structuredContainers } = result;
   range.commonAncestorContainer.parentNode?.replaceChild(documentFragment, range.commonAncestorContainer);
+  // const newSelectionRange = document.createRange();
+  // newSelectionRange.selectNodeContents(structuredContainers[0].firstChild!);
+  // selection.removeAllRanges();
+  // selection.addRange(newSelectionRange);
   showAcronymPopover({ structuredContainer: structuredContainers[0], expandImmediately: false });
 });

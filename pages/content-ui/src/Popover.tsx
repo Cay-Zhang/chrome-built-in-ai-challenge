@@ -169,7 +169,6 @@ export default function Popover(props: {
   const handleClose = () => {
     setIsClosing(true);
     setIsExpanded(false);
-    setTimeout(props.removeFromDOM, 1000); // Delay removal to allow animation to complete
   };
 
   return (
@@ -200,7 +199,8 @@ export default function Popover(props: {
                 isExpanded || isClosing
                   ? { type: 'spring', duration: 0.5, bounce: 0.1 }
                   : { ease: [0.95, 0.05, 0.795, 0.035], duration: 0.5 },
-            }}>
+            }}
+            onAnimationComplete={() => isClosing && props.removeFromDOM()}>
             {isExpanded && (
               <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
             )}
