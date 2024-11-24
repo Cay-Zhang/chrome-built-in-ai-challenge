@@ -17,15 +17,17 @@ import {
 } from '@extension/ui';
 import { openRouterLanguageModel, useStorage } from '@extension/shared';
 import { exampleThemeStorage, Model, modelStorage, openRouterApiKeyStorage } from '@extension/storage';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Wiki } from './Wiki';
 import { AI } from './AI';
 import { Check, ChevronsUpDown } from 'lucide-react';
 
 const models: { model: Model; label: string }[] = [
-  { model: 'chatgpt-4o-latest', label: 'ChatGPT 4o' },
-  { model: 'google/gemini-pro-1.5', label: 'Gemini 1.5 Pro' },
   { model: '_builtin', label: 'Built-in' },
+  { model: 'google/gemini-flash-1.5-8b', label: 'Gemini 1.5 Flash-8B' },
+  { model: 'google/gemini-pro-1.5', label: 'Gemini 1.5 Pro' },
+  { model: 'chatgpt-4o-latest', label: 'ChatGPT 4o' },
+  { model: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet' },
 ];
 
 function PopoverContent({
@@ -69,8 +71,8 @@ function PopoverContent({
         className="flex justify-between w-full">
         <ShadcnPopover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox" aria-expanded={open} className="w-[200px] justify-between">
-              {models.find(({ model: m }) => m === model)!.label}
+            <Button variant="outline" role="combobox" aria-expanded={open} className="justify-between">
+              {models.find(({ model: m }) => m === model)?.label ?? 'Select model'}
               <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
