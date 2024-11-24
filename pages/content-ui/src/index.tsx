@@ -1,9 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import App from '@src/App';
 import tailwindcssOutput from '../dist/tailwind-output.css?inline';
 import '@extension/shared/lib/scheduler';
 import Popover from './Popover';
 import { isAcronymDetectionEnabledStorage } from '@extension/storage';
+import { injectStyles } from './utils';
 
 const acronymMarkerSymbol = Symbol('acronym-marker');
 let popoverId = 0;
@@ -48,10 +48,7 @@ function showAcronymPopover({
 
   const shadowRoot = shadowRootContainer.attachShadow({ mode: 'open' });
 
-  // Add styles to the shadow DOM
-  const style = document.createElement('style');
-  style.innerHTML = tailwindcssOutput;
-  shadowRoot.appendChild(style);
+  injectStyles(shadowRoot, tailwindcssOutput);
 
   const reactRoot = document.createElement('div');
   shadowRoot.appendChild(reactRoot);
@@ -239,36 +236,6 @@ async function highlightAcronyms() {
 scheduler.postTask(async () => (await isAcronymDetectionEnabledStorage.get()) && highlightAcronyms(), {
   priority: 'user-visible',
 });
-
-const root = document.createElement('div');
-root.id = 'chrome-extension-boilerplate-react-vite-content-view-root';
-
-document.body.append(root);
-
-const rootIntoShadow = document.createElement('div');
-rootIntoShadow.id = 'shadow-root';
-
-const shadowRoot = root.attachShadow({ mode: 'open' });
-
-if (navigator.userAgent.includes('Firefox')) {
-  /**
-   * In the firefox environment, adoptedStyleSheets cannot be used due to the bug
-   * @url https://bugzilla.mozilla.org/show_bug.cgi?id=1770592
-   *
-   * Injecting styles into the document, this may cause style conflicts with the host page
-   */
-  const styleElement = document.createElement('style');
-  styleElement.innerHTML = tailwindcssOutput;
-  shadowRoot.appendChild(styleElement);
-} else {
-  /** Inject styles into shadow dom */
-  const globalStyleSheet = new CSSStyleSheet();
-  globalStyleSheet.replaceSync(tailwindcssOutput);
-  shadowRoot.adoptedStyleSheets = [globalStyleSheet];
-}
-
-shadowRoot.appendChild(rootIntoShadow);
-createRoot(rootIntoShadow).render(<App />);
 
 document.addEventListener('pointerup', e => {
   const selection = window.getSelection();
