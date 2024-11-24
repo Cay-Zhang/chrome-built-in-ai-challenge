@@ -28,6 +28,7 @@
     "tsc-alias": "^1.8.10"
   },
   "dependencies": {
+    "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-popover": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.0",

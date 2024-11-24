@@ -1,7 +1,7 @@
 import '@src/Popup.css';
 import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage, openRouterApiKeyStorage } from '@extension/storage';
-import { Input } from '@extension/ui';
+import { exampleThemeStorage, isAcronymDetectionEnabledStorage, openRouterApiKeyStorage } from '@extension/storage';
+import { Checkbox, Input } from '@extension/ui';
 import type { ComponentPropsWithoutRef } from 'react';
 
 const notificationOptions = {
@@ -14,6 +14,7 @@ const notificationOptions = {
 const Popup = () => {
   const theme = useStorage(exampleThemeStorage);
   const openRouterApiKey = useStorage(openRouterApiKeyStorage);
+  const isAcronymDetectionEnabled = useStorage(isAcronymDetectionEnabledStorage);
   const isLight = theme === 'light';
   const logo = isLight ? 'popup/logo_vertical.svg' : 'popup/logo_vertical_dark.svg';
   const goGithubSite = () =>
@@ -69,6 +70,24 @@ const Popup = () => {
             value={openRouterApiKey ?? ''}
             onChange={e => openRouterApiKeyStorage.set(e.target.value || null)}
           />
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="acronym-detection"
+              checked={isAcronymDetectionEnabled}
+              onCheckedChange={async value => {
+                if (value !== 'indeterminate') {
+                  await isAcronymDetectionEnabledStorage.set(value);
+                  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                  if (tab.id) await chrome.tabs.reload(tab.id);
+                }
+              }}
+            />
+            <label
+              htmlFor="acronym-detection"
+              className={`text-sm font-medium ${isLight ? 'text-gray-900' : 'text-gray-100'}`}>
+              Enable acronym detection
+            </label>
+          </div>
         </div>
       </header>
     </div>

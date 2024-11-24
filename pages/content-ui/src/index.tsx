@@ -3,6 +3,7 @@ import App from '@src/App';
 import tailwindcssOutput from '../dist/tailwind-output.css?inline';
 import '@extension/shared/lib/scheduler';
 import Popover from './Popover';
+import { isAcronymDetectionEnabledStorage } from '@extension/storage';
 
 const acronymMarkerSymbol = Symbol('acronym-marker');
 let popoverId = 0;
@@ -235,7 +236,9 @@ async function highlightAcronyms() {
 }
 
 // Run the function when the content script loads
-scheduler.postTask(highlightAcronyms, { priority: 'user-visible' });
+scheduler.postTask(async () => (await isAcronymDetectionEnabledStorage.get()) && highlightAcronyms(), {
+  priority: 'user-visible',
+});
 
 const root = document.createElement('div');
 root.id = 'chrome-extension-boilerplate-react-vite-content-view-root';

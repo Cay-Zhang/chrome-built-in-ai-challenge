@@ -15,3 +15,8 @@ export const modelStorage = createStorage<Model>('model', 'chatgpt-4o-latest', {
   storageEnum: StorageEnum.Local,
   liveUpdate: true,
 });
+
+export const isAcronymDetectionEnabledStorage = createStorage<boolean>('is-acronym-detection-enabled', true, {
+  storageEnum: StorageEnum.Local,
+  liveUpdate: true,
+});
