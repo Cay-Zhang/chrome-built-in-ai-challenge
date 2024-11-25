@@ -92,7 +92,7 @@ function createStructuredContainers(ranges: Range[]) {
     const mark = document.createElement('mark');
     mark.textContent = text;
     mark.style.color = 'unset';
-    mark.style.backgroundColor = 'rgba(0, 105, 209, 0.5)';
+    mark.style.backgroundColor = 'unset';
 
     (mark.firstChild as Text as any)[acronymMarkerSymbol] = true;
 
@@ -245,9 +245,9 @@ document.addEventListener('pointerup', e => {
   if (!result) return;
   const { documentFragment, structuredContainers } = result;
   range.commonAncestorContainer.parentNode?.replaceChild(documentFragment, range.commonAncestorContainer);
-  // const newSelectionRange = document.createRange();
-  // newSelectionRange.selectNodeContents(structuredContainers[0].firstChild!);
-  // selection.removeAllRanges();
-  // selection.addRange(newSelectionRange);
+  const newSelectionRange = document.createRange();
+  newSelectionRange.selectNodeContents(structuredContainers[0].firstChild!);
+  selection.removeAllRanges();
+  selection.addRange(newSelectionRange);
   showAcronymPopover({ structuredContainer: structuredContainers[0], expandImmediately: false });
 });
