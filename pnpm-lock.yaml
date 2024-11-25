@@ -140,8 +140,8 @@ importers:
         specifier: ^4.3.1
         version: 4.3.1
       magic-string:
-        specifier: ^0.30.10
-        version: 0.30.11
+        specifier: ^0.30.13
+        version: 0.30.13
       ts-loader:
         specifier: ^9.5.1
         version: 9.5.1(typescript@5.5.4)(webpack@5.94.0(@swc/core@1.7.25)(esbuild@0.23.1))
@@ -195,7 +195,7 @@ importers:
     devDependencies:
       webidl2ts:
         specifier: github:giniedp/webidl2ts
-        version: https://codeload.github.com/giniedp/webidl2ts/tar.gz/e2cee208482032f02125647768a8859e2039b7c3
+        version: git+https://git@github.com:giniedp/webidl2ts.git#e2cee208482032f02125647768a8859e2039b7c3
 
   packages/shared:
     devDependencies:
@@ -3111,8 +3111,8 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  magic-string@0.30.11:
-    resolution: {integrity: sha512-+Wri9p0QHMy+545hKww7YAu5NyzF8iomPL/RQazugQ9+Ez4Ic3mERMd8ZTX5rfK944j+560ZJi8iAwgak1Ac7A==}
+  magic-string@0.30.13:
+    resolution: {integrity: sha512-8rYBO+MsWkgjDSOvLomYnzhdwEG51olQ4zL5KXnNJWV5MNmrb4rTZdrtkhxjnD/QyZUqR/Z/XDsUs/4ej2nx0g==}
 
   make-error@1.3.6:
     resolution: {integrity: sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==}
@@ -4277,8 +4277,8 @@ packages:
   webidl2@23.13.1:
     resolution: {integrity: sha512-u5njf3ZyqPr/4K8D6Cxm3B6MwSgwAdtrzxqHklwKaUdP1aQTmtKN5b65k4wlweJ/pRM6fpKUKYz8RlCJ9tka+w==}
 
-  webidl2ts@https://codeload.github.com/giniedp/webidl2ts/tar.gz/e2cee208482032f02125647768a8859e2039b7c3:
-    resolution: {tarball: https://codeload.github.com/giniedp/webidl2ts/tar.gz/e2cee208482032f02125647768a8859e2039b7c3}
+  webidl2ts@git+https://git@github.com:giniedp/webidl2ts.git#e2cee208482032f02125647768a8859e2039b7c3:
+    resolution: {commit: e2cee208482032f02125647768a8859e2039b7c3, repo: git@github.com:giniedp/webidl2ts.git, type: git}
     version: 1.0.4
     hasBin: true
 
@@ -5154,14 +5154,14 @@ snapshots:
 
   '@vitest/snapshot@1.6.0':
     dependencies:
-      magic-string: 0.30.11
+      magic-string: 0.30.13
       pathe: 1.1.2
       pretty-format: 29.7.0
 
   '@vitest/snapshot@2.0.5':
     dependencies:
       '@vitest/pretty-format': 2.0.5
-      magic-string: 0.30.11
+      magic-string: 0.30.13
       pathe: 1.1.2
 
   '@wdio/cli@9.1.2':
@@ -7360,7 +7360,7 @@ snapshots:
 
   lru-cache@7.18.3: {}
 
-  magic-string@0.30.11:
+  magic-string@0.30.13:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.0
 
@@ -8643,7 +8643,7 @@ snapshots:
 
   webidl2@23.13.1: {}
 
-  webidl2ts@https://codeload.github.com/giniedp/webidl2ts/tar.gz/e2cee208482032f02125647768a8859e2039b7c3:
+  webidl2ts@git+https://git@github.com:giniedp/webidl2ts.git#e2cee208482032f02125647768a8859e2039b7c3:
     dependencies:
       jsdom: 16.7.0
       typescript: 4.9.5
