@@ -43,6 +43,11 @@ function showAcronymPopover({
   // shadowRootContainer.style.positionTryFallbacks = 'flip-block';
   structuredContainer.appendChild(shadowRootContainer);
   shadowRootContainer.showPopover();
+  shadowRootContainer.addEventListener('toggle', ((event: ToggleEvent) => {
+    if (event.newState === 'closed') {
+      requestAnimationFrame(() => revertStructuredContainer(structuredContainer));
+    }
+  }) as any);
 
   popoverId += 1;
 
@@ -126,7 +131,10 @@ function revertStructuredContainer(structuredContainer: HTMLSpanElement) {
   const mark = structuredContainer.querySelector('mark');
   if (!mark) return;
   const textNode = document.createTextNode(mark.textContent!);
-  structuredContainer.parentElement?.replaceChild(textNode, structuredContainer);
+  const parent = structuredContainer.parentElement;
+  if (!parent) return;
+  parent.replaceChild(textNode, structuredContainer);
+  parent.normalize();
 }
 
 // Function to find and highlight acronyms
