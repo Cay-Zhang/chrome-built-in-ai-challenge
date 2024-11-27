@@ -93,6 +93,10 @@ function createStructuredContainers(ranges: Range[]) {
     mark.textContent = text;
     mark.style.color = 'unset';
     mark.style.backgroundColor = 'unset';
+    mark.style.textDecorationLine = 'underline';
+    mark.style.textDecorationColor = 'color-mix(in srgb, currentcolor 50%, transparent)';
+    mark.style.textDecorationThickness = '2px';
+    mark.style.textDecorationStyle = 'dotted';
 
     (mark.firstChild as Text as any)[acronymMarkerSymbol] = true;
 
