@@ -66,7 +66,7 @@ const shadcnConfig = {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['var(--font-sans)', ...fontFamily.sans],
+        sans: ['-apple-system', ...fontFamily.sans],
       },
       keyframes: {
         'accordion-down': {
