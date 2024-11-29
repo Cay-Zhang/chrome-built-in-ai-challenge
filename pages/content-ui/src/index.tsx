@@ -40,12 +40,16 @@ function showAcronymPopover({
   shadowRootContainer.style.backgroundColor = 'transparent';
   shadowRootContainer.style.margin = '0';
   shadowRootContainer.style.overflow = 'unset';
+  shadowRootContainer.style.fontSize = '16px';
   // shadowRootContainer.style.positionTryFallbacks = 'flip-block';
-  structuredContainer.appendChild(shadowRootContainer);
+  document.body.appendChild(shadowRootContainer);
   shadowRootContainer.showPopover();
   shadowRootContainer.addEventListener('toggle', ((event: ToggleEvent) => {
     if (event.newState === 'closed') {
-      requestAnimationFrame(() => revertStructuredContainer(structuredContainer));
+      requestAnimationFrame(() => {
+        revertStructuredContainer(structuredContainer);
+        shadowRootContainer.remove();
+      });
     }
   }) as any);
 
@@ -63,7 +67,12 @@ function showAcronymPopover({
     <Popover
       acronym={acronym}
       context={context}
-      removeFromDOM={() => requestAnimationFrame(() => revertStructuredContainer(structuredContainer))}
+      removeFromDOM={() =>
+        requestAnimationFrame(() => {
+          revertStructuredContainer(structuredContainer);
+          shadowRootContainer.remove();
+        })
+      }
       expandImmediately={expandImmediately}
     />,
   );
