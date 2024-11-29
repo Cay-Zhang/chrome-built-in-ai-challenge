@@ -91,11 +91,11 @@ Title of the Web Page:
 
 export function AI({ acronym, context, ai }: { acronym: string; context: string; ai: typeof window.ai }) {
   const [result, setResult] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isRequestInProgress, setIsRequestInProgress] = useState(false);
 
   useEffect(() => {
     const lookup = async () => {
-      setIsLoading(true);
+      setIsRequestInProgress(true);
       setResult('');
 
       let value: string | null = '';
@@ -123,7 +123,7 @@ export function AI({ acronym, context, ai }: { acronym: string; context: string;
         console.error('Error:', error);
         setResult('An error occurred while processing the request.');
       } finally {
-        setIsLoading(false);
+        setIsRequestInProgress(false);
       }
     };
 
@@ -131,9 +131,9 @@ export function AI({ acronym, context, ai }: { acronym: string; context: string;
   }, [acronym, context, ai]);
 
   return (
-    <motion.div layout>
+    <motion.div layout="position">
       <div className="flex gap-1">
-        {isLoading ? acronym : <ReactMarkdown className="prose dark:prose-invert">{result}</ReactMarkdown>}
+        {!result ? acronym : <ReactMarkdown className="prose dark:prose-invert">{result}</ReactMarkdown>}
       </div>
     </motion.div>
   );
