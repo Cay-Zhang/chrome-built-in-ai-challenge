@@ -31,15 +31,7 @@ const models: { model: Model; label: string }[] = [
   { model: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet' },
 ];
 
-function PopoverContent({
-  removeFromDOM,
-  acronym,
-  context,
-}: {
-  removeFromDOM: () => void;
-  acronym: string;
-  context: string;
-}) {
+function PopoverContent({ close, acronym, context }: { close: () => void; acronym: string; context: string }) {
   const openRouterApiKey = useStorage(openRouterApiKeyStorage);
   const model = useStorage(modelStorage);
   const [open, setOpen] = useState(false);
@@ -105,7 +97,7 @@ function PopoverContent({
           onClick={event => {
             event.preventDefault();
             event.stopPropagation();
-            removeFromDOM();
+            close();
           }}>
           <svg xmlns="http://www.w3.org/2000/svg" className="size-5" viewBox="0 0 20 20" fill="currentColor">
             <path
@@ -145,13 +137,12 @@ function PopoverContent({
 }
 
 export default function Popover(props: {
-  removeFromDOM: () => void;
+  close: () => void;
   acronym: string;
   context: string;
   expandImmediately: boolean;
 }) {
   const theme = useStorage(exampleThemeStorage);
-  const [isClosing, setIsClosing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const popoverContainerRef = useRef<HTMLDivElement>(null);
@@ -172,11 +163,6 @@ export default function Popover(props: {
     () => props.expandImmediately && requestAnimationFrame(() => requestAnimationFrame(() => setIsExpanded(true))),
   );
 
-  const handleClose = () => {
-    setIsClosing(true);
-    setIsExpanded(false);
-  };
-
   return (
     <PopoverContainerContext.Provider value={{ containerRef: popoverContainerRef }}>
       <div ref={popoverContainerRef} className={theme === 'dark' ? 'text-foreground dark' : 'text-foreground'}>
@@ -187,7 +173,7 @@ export default function Popover(props: {
           <motion.div
             layout
             initial={{ opacity: 0, y: 4, scaleX: 0.2 }}
-            animate={{ opacity: !isClosing ? 1 : 0, y: 4, scaleX: 1 }}
+            animate={{ opacity: 1, y: 4, scaleX: 1 }}
             style={{
               width: isExpanded
                 ? 'auto'
@@ -195,26 +181,24 @@ export default function Popover(props: {
                   ? 'clamp(50px, calc(100% + 20px), 320px)'
                   : 'calc(clamp(50px, calc(100% + 20px), 320px) * 1.25)',
             }}
-            className={`backdrop-blur-lg ${isClosing ? 'bg-background/80' : isExpanded || props.expandImmediately ? 'bg-foreground/0' : 'bg-foreground/75'} rounded-2xl border border-border/20 shadow-lg overflow-hidden transition-colors duration-200 flex-shrink-0`}
+            className={`backdrop-blur-lg ${isExpanded || props.expandImmediately ? 'bg-foreground/0' : 'bg-foreground/75'} rounded-2xl border border-border/20 shadow-lg overflow-hidden transition-colors duration-200 flex-shrink-0`}
             transition={{
               default: { type: 'spring', duration: 0.5, bounce: 0.1 },
-              opacity: isClosing ? { duration: 0.3 } : { duration: 0.5 },
-              layout:
-                isExpanded || isClosing
-                  ? { type: 'spring', duration: 0.5, bounce: 0.1 }
-                  : { ease: [0.95, 0.05, 0.795, 0.035], duration: 0.5 },
-            }}
-            onAnimationComplete={() => isClosing && props.removeFromDOM()}>
+              opacity: { duration: 0.5 },
+              layout: isExpanded
+                ? { type: 'spring', duration: 0.5, bounce: 0.1 }
+                : { ease: [0.95, 0.05, 0.795, 0.035], duration: 0.5 },
+            }}>
             <AnimateChangeInHeight
               transition={
-                isExpanded || isClosing
+                isExpanded
                   ? { type: 'spring', duration: 0.5, bounce: 0.1 }
                   : { ease: [0.95, 0.05, 0.795, 0.035], duration: 0.5 }
               }>
               {isExpanded ? (
-                <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
+                <PopoverContent acronym={props.acronym} context={props.context} close={props.close} />
               ) : (
-                <div style={{ height: isHovering && !isClosing ? '20px' : '8px' }} />
+                <div style={{ height: isHovering ? '20px' : '8px' }} />
               )}
             </AnimateChangeInHeight>
           </motion.div>
