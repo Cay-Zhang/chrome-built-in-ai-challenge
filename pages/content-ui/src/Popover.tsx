@@ -14,6 +14,7 @@ import {
   Popover as ShadcnPopover,
   PopoverContent as ShadcnPopoverContent,
   PopoverContainerContext,
+  AnimateChangeInHeight,
 } from '@extension/ui';
 import { openRouterLanguageModel, useStorage } from '@extension/shared';
 import { exampleThemeStorage, Model, modelStorage, openRouterApiKeyStorage } from '@extension/storage';
@@ -166,7 +167,10 @@ export default function Popover(props: {
     if (expansionTimeoutRef.current) window.clearTimeout(expansionTimeoutRef.current);
   }, []);
 
-  useState(() => props.expandImmediately && requestAnimationFrame(() => setIsExpanded(true)));
+  // delay expansion for AnimateChangeInHeight to work properly
+  useState(
+    () => props.expandImmediately && requestAnimationFrame(() => requestAnimationFrame(() => setIsExpanded(true))),
+  );
 
   const handleClose = () => {
     setIsClosing(true);
@@ -185,15 +189,13 @@ export default function Popover(props: {
             initial={{ opacity: 0, y: 4, scaleX: 0.2 }}
             animate={{ opacity: !isClosing ? 1 : 0, y: 4, scaleX: 1 }}
             style={{
-              height: isExpanded ? 'auto' : isHovering && !isClosing ? '20px' : '8px',
               width: isExpanded
                 ? 'auto'
                 : !isHovering
                   ? 'clamp(50px, calc(100% + 20px), 320px)'
                   : 'calc(clamp(50px, calc(100% + 20px), 320px) * 1.25)',
-              borderRadius: 16,
             }}
-            className={`backdrop-blur-lg ${isClosing ? 'bg-background/80' : isExpanded || props.expandImmediately ? 'bg-foreground/0' : 'bg-foreground/75'} border border-border/20 shadow-lg overflow-hidden transition-colors duration-200 flex-shrink-0`}
+            className={`backdrop-blur-lg ${isClosing ? 'bg-background/80' : isExpanded || props.expandImmediately ? 'bg-foreground/0' : 'bg-foreground/75'} rounded-2xl border border-border/20 shadow-lg overflow-hidden transition-colors duration-200 flex-shrink-0`}
             transition={{
               default: { type: 'spring', duration: 0.5, bounce: 0.1 },
               opacity: isClosing ? { duration: 0.3 } : { duration: 0.5 },
@@ -203,9 +205,18 @@ export default function Popover(props: {
                   : { ease: [0.95, 0.05, 0.795, 0.035], duration: 0.5 },
             }}
             onAnimationComplete={() => isClosing && props.removeFromDOM()}>
-            {isExpanded && (
-              <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
-            )}
+            <AnimateChangeInHeight
+              transition={
+                isExpanded || isClosing
+                  ? { type: 'spring', duration: 0.5, bounce: 0.1 }
+                  : { ease: [0.95, 0.05, 0.795, 0.035], duration: 0.5 }
+              }>
+              {isExpanded ? (
+                <PopoverContent acronym={props.acronym} context={props.context} removeFromDOM={handleClose} />
+              ) : (
+                <div style={{ height: isHovering && !isClosing ? '20px' : '8px' }} />
+              )}
+            </AnimateChangeInHeight>
           </motion.div>
         </div>
       </div>
