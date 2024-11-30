@@ -23,7 +23,7 @@ function showAcronymPopover({
   structuredContainer.setAttribute('data-popover-id', String(popoverId));
 
   acronym ??= structuredContainer.textContent!;
-  context ??= structuredContainer.parentElement?.textContent ?? acronym;
+  context ??= structuredContainer.closest(':not(span):not(mark)')?.textContent || acronym;
 
   const mark = structuredContainer.querySelector('mark');
   if (!mark) return;
@@ -179,7 +179,6 @@ async function highlightAcronyms() {
             structuredContainer: container,
             expandImmediately: false,
             acronym: match,
-            context: node.nodeValue ?? '',
           }),
         );
 

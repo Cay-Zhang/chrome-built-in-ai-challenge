@@ -156,7 +156,7 @@ export function AI({ acronym, context, ai }: { acronym: string; context: string;
     <motion.div layout="position">
       <div className="flex gap-1">
         {result && (
-          <ReactMarkdown className="prose dark:prose-invert">
+          <ReactMarkdown className="w-full prose dark:prose-invert">
             {result + (isRequestInProgress ? ' ⬤' : '')}
           </ReactMarkdown>
         )}
