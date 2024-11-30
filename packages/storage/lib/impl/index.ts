@@ -11,7 +11,7 @@ export const openRouterApiKeyStorage = createStorage<string | null>('open-router
 
 export type Model = (string & {}) | '_builtin' | ChatModel;
 
-export const modelStorage = createStorage<Model>('model', 'chatgpt-4o-latest', {
+export const modelStorage = createStorage<Model>('model', '_builtin', {
   storageEnum: StorageEnum.Local,
   liveUpdate: true,
 });
