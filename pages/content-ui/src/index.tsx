@@ -23,7 +23,7 @@ function showAcronymPopover({
   structuredContainer.setAttribute('data-popover-id', String(popoverId));
 
   acronym ??= structuredContainer.textContent!;
-  context ??= structuredContainer.closest(':not(span):not(mark)')?.textContent || acronym;
+  context ??= structuredContainer.closest(':not(span):not(mark):not(code)')?.textContent || acronym;
 
   const mark = structuredContainer.querySelector('mark');
   if (!mark) return;
