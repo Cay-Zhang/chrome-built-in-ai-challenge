@@ -154,8 +154,9 @@ async function highlightAcronyms() {
   // Function to process a single text node
   function processTextNode(node: Text) {
     if ((node as any)[acronymMarkerSymbol]) return;
-
-    const matches = Array.from(node.nodeValue?.matchAll(acronymRegex) ?? []);
+    const matches = Array.from(node.nodeValue?.matchAll(acronymRegex) ?? []).filter(
+      ([str]) => str.length <= 6 && str.replace(/[^A-Z]/g, '').length / str.length >= 0.5,
+    );
     if (matches.length > 0 && node.parentNode) {
       // Create ranges for each match
       const ranges = matches.map(match => {
@@ -176,7 +177,7 @@ async function highlightAcronyms() {
         container.addEventListener('mouseenter', () =>
           showAcronymPopover({
             structuredContainer: container,
-            expandImmediately: true,
+            expandImmediately: false,
             acronym: match,
             context: node.nodeValue ?? '',
           }),
@@ -253,8 +254,14 @@ async function highlightAcronyms() {
   });
 }
 
+async function shouldHighlightAcronyms(): Promise<boolean> {
+  const isAcronymDetectionEnabled = await isAcronymDetectionEnabledStorage.get();
+  const isGoogleSearch = location.hostname === 'www.google.com' && location.pathname === '/search';
+  return isAcronymDetectionEnabled && !isGoogleSearch;
+}
+
 // Run the function when the content script loads
-scheduler.postTask(async () => (await isAcronymDetectionEnabledStorage.get()) && highlightAcronyms(), {
+scheduler.postTask(async () => (await shouldHighlightAcronyms()) && highlightAcronyms(), {
   priority: 'user-visible',
 });
 
