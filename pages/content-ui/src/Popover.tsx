@@ -21,7 +21,8 @@ import { exampleThemeStorage, Model, modelStorage, openRouterApiKeyStorage } fro
 import { motion } from 'framer-motion';
 import { Wiki } from './Wiki';
 import { AI } from './AI';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { GoogleButton } from './GoogleButton';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
 
 const models: { model: Model; label: string }[] = [
   { model: '_builtin', label: 'Built-in' },
@@ -91,22 +92,20 @@ function PopoverContent({ close, acronym, context }: { close: () => void; acrony
           </ShadcnPopoverContent>
         </ShadcnPopover>
 
-        <Button
-          variant="secondary"
-          className="p-1"
-          onClick={event => {
-            event.preventDefault();
-            event.stopPropagation();
-            close();
-          }}>
-          <svg xmlns="http://www.w3.org/2000/svg" className="size-5" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </Button>
+        <div className="flex gap-1">
+          {aiWithSelectedModel && <GoogleButton acronym={acronym} context={context} ai={aiWithSelectedModel} />}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-1"
+            onClick={event => {
+              event.preventDefault();
+              event.stopPropagation();
+              close();
+            }}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
       </motion.div>
       <motion.div
         layout="position"
