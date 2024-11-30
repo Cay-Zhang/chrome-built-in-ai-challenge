@@ -19,7 +19,8 @@ function showAcronymPopover({
   acronym?: string;
   context?: string;
 }) {
-  if (structuredContainer.querySelector('.popover-container')) return;
+  if (structuredContainer.getAttribute('data-popover-id')) return;
+  structuredContainer.setAttribute('data-popover-id', String(popoverId));
 
   acronym ??= structuredContainer.textContent!;
   context ??= structuredContainer.parentElement?.textContent ?? acronym;
