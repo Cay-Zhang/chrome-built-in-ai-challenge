@@ -153,7 +153,7 @@ export function AI({ acronym, context, ai }: { acronym: string; context: string;
   }, [acronym, context, ai]);
 
   return (
-    <motion.div layout="position">
+    <motion.div layout="position" className="w-[400px]">
       <div className="flex gap-1">
         {result && (
           <ReactMarkdown className="w-full prose dark:prose-invert">

@@ -56,7 +56,7 @@ function PopoverContent({ close, acronym, context }: { close: () => void; acrony
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.1 }}
-      className="bg-background/80 flex min-w-[400px] flex-col items-center gap-2 p-4">
+      className="bg-background/80 flex min-w-[400px] flex-col items-center gap-4 p-4">
       <motion.div
         layout="position"
         initial={{ opacity: 0, y: 20 }}
@@ -109,22 +109,12 @@ function PopoverContent({ close, acronym, context }: { close: () => void; acrony
       </motion.div>
       <motion.div
         layout="position"
+        className="px-1"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', duration: 0.3, bounce: 0, delay: 0.5 }}>
         {aiWithSelectedModel ? (
-          <Tabs defaultValue="ai" className="w-[400px]">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="wiki">Wiki</TabsTrigger>
-              <TabsTrigger value="ai">AI</TabsTrigger>
-            </TabsList>
-            <TabsContent value="wiki">
-              <Wiki acronym={acronym} context={context} ai={aiWithSelectedModel} />
-            </TabsContent>
-            <TabsContent value="ai">
-              <AI acronym={acronym} context={context} ai={aiWithSelectedModel} />
-            </TabsContent>
-          </Tabs>
+          <AI acronym={acronym} context={context} ai={aiWithSelectedModel} />
         ) : (
           <div className="text-center">
             {model === '_builtin' ? 'Built-in AI model is not available.' : 'Enter API key to use AI.'}
