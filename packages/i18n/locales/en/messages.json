@@ -1,11 +1,11 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "Chrome extension boilerplate developed with Vite, React and Typescript"
+    "message": "Instantly understand the meaning of any text/code within its surrounding context."
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "Cay extension test"
+    "message": "Contextual Lookup"
   },
   "toggleTheme": {
     "message": "Toggle theme"

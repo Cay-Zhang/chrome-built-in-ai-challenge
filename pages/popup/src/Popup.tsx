@@ -16,7 +16,6 @@ const Popup = () => {
   const openRouterApiKey = useStorage(openRouterApiKeyStorage);
   const isAcronymDetectionEnabled = useStorage(isAcronymDetectionEnabledStorage);
   const isLight = theme === 'light';
-  const logo = isLight ? 'popup/logo_vertical.svg' : 'popup/logo_vertical_dark.svg';
   const goGithubSite = () =>
     chrome.tabs.create({ url: 'https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite' });
 
@@ -44,52 +43,39 @@ const Popup = () => {
     <div
       className={`App ${isLight ? 'bg-slate-50' : 'bg-gray-800'} ${theme === 'dark' ? 'dark text-foreground' : 'text-foreground'}`}>
       <header className={`App-header ${isLight ? 'text-gray-900' : 'text-gray-100'}`}>
-        <button onClick={goGithubSite}>
-          <img src={chrome.runtime.getURL(logo)} className="App-logo" alt="logo" />
-        </button>
-        <p>
-          Edit <code>pages/popup/src/Popup.tsx</code>
-        </p>
-        <button
-          className={
-            'font-bold mt-4 py-1 px-4 rounded shadow hover:scale-105 ' +
-            (isLight ? 'bg-blue-200 text-black' : 'bg-gray-700 text-white')
-          }
-          onClick={injectContentScript}>
-          Click to inject Content Script
-        </button>
+        <h1 className="text-2xl font-bold">Contextual Lookup</h1>
         <ToggleButton>Toggle theme</ToggleButton>
-        <div className="mt-4 flex flex-col gap-2">
-          <label htmlFor="api-key" className={`text-sm font-medium ${isLight ? 'text-gray-900' : 'text-gray-100'}`}>
-            OpenRouter API Key
-          </label>
-          <Input
-            id="api-key"
-            type="password"
-            placeholder="Enter API key"
-            value={openRouterApiKey ?? ''}
-            onChange={e => openRouterApiKeyStorage.set(e.target.value || null)}
-          />
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="acronym-detection"
-              checked={isAcronymDetectionEnabled}
-              onCheckedChange={async value => {
-                if (value !== 'indeterminate') {
-                  await isAcronymDetectionEnabledStorage.set(value);
-                  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-                  if (tab.id) await chrome.tabs.reload(tab.id);
-                }
-              }}
-            />
-            <label
-              htmlFor="acronym-detection"
-              className={`text-sm font-medium ${isLight ? 'text-gray-900' : 'text-gray-100'}`}>
-              Enable acronym detection
-            </label>
-          </div>
-        </div>
       </header>
+      <div className="mt-4 flex flex-col gap-2">
+        <label htmlFor="api-key" className={`text-sm font-medium ${isLight ? 'text-gray-900' : 'text-gray-100'}`}>
+          OpenRouter API Key
+        </label>
+        <Input
+          id="api-key"
+          type="password"
+          placeholder="Enter API key"
+          value={openRouterApiKey ?? ''}
+          onChange={e => openRouterApiKeyStorage.set(e.target.value || null)}
+        />
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="acronym-detection"
+            checked={isAcronymDetectionEnabled}
+            onCheckedChange={async value => {
+              if (value !== 'indeterminate') {
+                await isAcronymDetectionEnabledStorage.set(value);
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                if (tab.id) await chrome.tabs.reload(tab.id);
+              }
+            }}
+          />
+          <label
+            htmlFor="acronym-detection"
+            className={`text-sm font-medium ${isLight ? 'text-gray-900' : 'text-gray-100'}`}>
+            Enable acronym detection
+          </label>
+        </div>
+      </div>
     </div>
   );
 };
