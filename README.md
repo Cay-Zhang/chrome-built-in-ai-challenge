@@ -22,7 +22,7 @@ Contextual Lookup is a Chrome extension that addresses this gap by extracting an
 Built with the latest web technologies, Contextual Lookup offers a seamless user experience while providing flexibility with multiple AI integration options, including Chrome's native AI models and server-side solutions via OpenRouter.
 
 ## Installation
-1. Download extension.zip from releases and unzip
+1. Download extension.zip from [releases](https://github.com/Cay-Zhang/chrome-built-in-ai-challenge/releases/tag/hackathon) and unzip
 2. Open in browser - `chrome://extensions`
 3. Check - `Developer mode`
 4. Find and Click - `Load unpacked extension`
